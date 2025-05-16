@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=general-sans@400,500,600&display=swap"
+      rel="stylesheet"
+    />
+    <title>Task Tracker</title>
+  </head>
+  <style>
+    body {
+      font-family: general sans;
+      place-items: center;
+
+      color: black;
+      height: 100vh;
+      margin: 0rem 8rem;
+      background-color: white;
+
+      border-left: 1px solid rgb(177, 177, 177);
+      border-right: 1px solid rgb(177, 177, 177);
+    }
+
+    .title {
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    .input {
+      font-family: general sans;
+      font-size: 16px;
+      padding: 0.3rem 0.25rem;
+      border: none;
+      border-bottom: 1px solid black;
+      outline: none;
+    }
+
+    .lists,
+    .todo-container {
+      display: grid;
+      grid-template-columns: 240px 160px 120px;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .todo-container {
+      align-items: stretch;
+      position: relative;
+    }
+
+    .add-button {
+      background-color: black;
+      font-family: general sans;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      align-items: stretch;
+    }
+
+    .add-button:hover {
+      background-color: rgb(30, 30, 30);
+    }
+
+    .delete-button {
+      background-color: lightgrey;
+      font-family: general sans;
+      padding: 0.4rem 0.25rem;
+      color: black;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      align-items: stretch;
+      cursor: pointer;
+    }
+
+    .name-alert,
+    .date-alert {
+      display: none;
+      position: absolute;
+      top: 80px;
+      left: 50px;
+      border: 1px solid lightgray;
+      background-color: rgb(255, 255, 255);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      height: 25vh;
+      width: 30vw;
+    }
+
+    .name-alert p {
+      font-size: 1.15rem;
+      margin: 0;
+    }
+
+    .name-button-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 4rem;
+    }
+
+    .alert-button-name,
+    .alert-name {
+      background-color: rgb(55, 55, 232);
+      color: white;
+      border-radius: 4px;
+      border: none;
+      padding: 0.25rem 0.8rem;
+      font-family: general sans;
+      font-size: 1rem;
+    }
+
+    .alert-button-name:hover,
+    .alert-name:hover {
+      background-color: rgb(99, 99, 239);
+      cursor: pointer;
+    }
+  </style>
+
+  <body>
+    <p class="title">TODO-LIST</p>
+
+    <div class="todo-container">
+      <input class="js-input input" type="text" placeholder="Add Todo..." />
+
+      <input class="js-date input" type="date" />
+
+      <button
+        class="add-button"
+        onclick="
+      addTodo();
+      "
+      >
+        Add
+      </button>
+
+      <div class="lists"></div>
+
+      <div class="name-alert js-name-alert">
+        <p>Todo name cannot be empty!</p>
+
+        <div class="name-button-container">
+          <button class="alert-button-name js-alert-button-name">Okay</button>
+        </div>
+      </div>
+
+      <div class="date-alert js-date-alert">
+        <p>Date cannot be empty!</p>
+
+        <div class="name-button-container">
+          <button class="alert-name js-alert-name">Okay</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const todoLists = JSON.parse(localStorage.getItem("todoLists")) || [];
+
+      renderTodoList();
+
+      function renderTodoList() {
+        let todoListHTML = "";
+
+        for (let i = 0; i < todoLists.length; i++) {
+          const todoObject = todoLists[i];
+
+          const name = todoObject.name;
+          const dueDate = todoObject.dueDate;
+
+          const html = `
+        <div>${name}</div>
+        <div>${dueDate}</div>
+        <button class="delete-button"onclick="
+          todoLists.splice(${i}, 1);
+          renderTodoList();
+          saveToStorage();
+
+        ">Delete</button>
+        `;
+
+          todoListHTML += html;
+        }
+
+        document.querySelector(".lists").innerHTML = todoListHTML;
+      }
+
+      function addTodo() {
+        const inputElem = document.querySelector(".js-input");
+        const name = inputElem.value;
+
+        const dateInput = document.querySelector(".js-date");
+        const dueDate = dateInput.value;
+
+        const alertElem = document.querySelector(".js-name-alert");
+        const thisIsAlertButton = document.querySelector(
+          ".js-alert-button-name"
+        );
+
+        const dateAlert = document.querySelector(".js-date-alert");
+        const thisIsDateButton = document.querySelector(".js-alert-name");
+
+        if (!name) {
+          alertElem.style.display = "block";
+          thisIsAlertButton.addEventListener("click", () => {
+            alertElem.style.display = "none";
+          });
+          return;
+        }
+
+        if (!dueDate) {
+          dateAlert.style.display = "block";
+          thisIsDateButton.addEventListener("click", () => {
+            dateAlert.style.display = "none";
+          });
+          return;
+        }
+
+        todoLists.push({
+          name,
+          dueDate,
+        });
+
+        inputElem.value = "";
+        dateInput.value = "";
+
+        renderTodoList();
+
+        saveToStorage();
+      }
+
+      function saveToStorage() {
+        localStorage.setItem("todoLists", JSON.stringify(todoLists));
+      }
+    </script>
+  </body>
+</html>
